@@ -1,0 +1,638 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Para Você 💕</title>
+<link rel="icon" type="image/svg+xml" href="favicon.svg">
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=Crimson+Pro:ital,wght@0,300;0,400;1,300&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --rose:      #e8a0b4;
+    --rose-dark: #c2637a;
+    --blush:     #fce4ec;
+    --cream:     #fff8f0;
+    --wine:      #7b2d42;
+    --text:      #3d1f2b;
+    --muted:     #9e6b7a;
+  }
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  html { scroll-behavior: smooth; }
+  body {
+    background: var(--cream);
+    color: var(--text);
+    font-family: 'Crimson Pro', Georgia, serif;
+    overflow-x: hidden;
+  }
+  body::before {
+    content: '';
+    position: fixed; inset: 0; pointer-events: none; z-index: 999;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='200'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='200' height='200' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E");
+    opacity: .3;
+  }
+
+  /* ══ SECTION 1 ══ */
+  #hero {
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: flex-start;
+    padding: clamp(42px, 9vh, 82px) 20px 70px;
+    position: relative;
+    background: radial-gradient(ellipse at 60% 40%, #fce4ec 0%, var(--cream) 70%);
+    overflow: hidden;
+  }
+  #hero.opened {
+    justify-content: center;
+    padding-top: 32px;
+    padding-bottom: 42px;
+  }
+  #hero.opened h1,
+  #hero.opened p.subtitle {
+    display: none;
+  }
+  #hero h1 {
+    font-family: 'Playfair Display', serif;
+    font-style: italic;
+    font-size: clamp(1.8rem, 4.5vw, 3.2rem);
+    color: var(--wine);
+    letter-spacing: .05em;
+    margin-bottom: 12px;
+    opacity: 0;
+    transform: translateY(-20px);
+    animation: fadeDown .8s .2s forwards;
+  }
+  #hero p.subtitle {
+    font-size: 1.15rem;
+    color: var(--muted);
+    margin-bottom: 38px;
+    opacity: 0;
+    animation: fadeDown .8s .5s forwards;
+  }
+  @keyframes fadeDown { to { opacity:1; transform:translateY(0); } }
+
+  #startBtn {
+    position: relative;
+    isolation: isolate;
+    background: #fff;
+    color: #fff;
+    border: 1px solid rgba(255,255,255,.8);
+    padding: 5px;
+    border-radius: 50px;
+    font-family: 'Playfair Display', serif;
+    font-size: 1.05rem;
+    letter-spacing: .1em;
+    cursor: pointer;
+    box-shadow: 0 18px 42px rgba(123,45,66,.18), inset 0 0 0 1px rgba(194,99,122,.12);
+    transition: transform .2s, box-shadow .2s;
+    opacity: 0;
+    animation: fadeDown .8s .8s forwards;
+  }
+  #startBtn::before {
+    content: '';
+    position: absolute;
+    inset: 5px;
+    border-radius: inherit;
+    background: linear-gradient(135deg, #d87594 0%, var(--wine) 100%);
+    z-index: -1;
+  }
+  #startBtn span {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 250px;
+    min-height: 46px;
+    padding: 0 30px;
+    border-radius: inherit;
+    background: linear-gradient(135deg, rgba(255,255,255,.18), rgba(255,255,255,0));
+  }
+  #startBtn:hover  { transform: translateY(-3px) scale(1.03); box-shadow: 0 22px 46px rgba(123,45,66,.25), inset 0 0 0 1px rgba(194,99,122,.12); }
+  #startBtn:active { transform: scale(.97); }
+  #startBtn.hidden { display: none; }
+
+  /* ── heart stage ── */
+  #heartStage {
+    display: none;
+    flex-direction: column;
+    align-items: center;
+    width: 100%;
+    margin-top: 0;
+    gap: 18px;
+  }
+  #heartStage.visible { display: flex; }
+  #hero.opened #heartStage {
+    transform: translateY(clamp(64px, 6.3vw, 86px));
+  }
+
+  #heartCanvas {
+    position: relative;
+    width: min(440px, 92vw, calc(64svh * 440 / 410));
+    aspect-ratio: 440 / 410;
+    margin: 0 auto;
+    opacity: 0;
+    transform: scale(.9);
+  }
+  #heartStage.visible #heartCanvas {
+    animation: openHeart .75s cubic-bezier(.2,.78,.24,1) forwards;
+  }
+  @keyframes openHeart {
+    to { opacity: 1; transform: scale(1); }
+  }
+
+  /* each letter */
+  .char-dot {
+    position: absolute;
+    display: inline-block;
+    font-family: 'Playfair Display', serif;
+    font-weight: 700;
+    font-size: clamp(10px, 3vw, 13px);
+    color: var(--rose-dark);
+    pointer-events: none;
+    user-select: none;
+    white-space: pre;
+    min-width: .35em;
+    text-align: center;
+    transform: translate(-50%, -50%) translate(var(--start-x, 0), var(--start-y, 0)) scale(.2) rotate(var(--spin, 0deg));
+    opacity: 0;
+    filter: blur(5px);
+    text-shadow: 0 0 8px rgba(194,99,122,.25);
+    transition: transform .7s cubic-bezier(.18,.89,.32,1.28),
+                opacity   .45s ease,
+                filter    .5s ease;
+  }
+  .char-dot.show {
+    transform: translate(-50%, -50%) scale(1);
+    opacity: 1;
+    filter: blur(0);
+  }
+  /* gentle float after appearing */
+  .char-dot.float {
+    animation: charFloat 3.5s ease-in-out infinite;
+  }
+  @keyframes charFloat {
+    0%, 100% { translate: 0 0; }
+    50%       { translate: 0 -3px; }
+  }
+
+  /* ── photo inside heart ── */
+  #photoWrap {
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    transform: translate(-50%, -50%) scale(.86);
+    width: clamp(92px, 27%, 118px);
+    aspect-ratio: 1;
+    border-radius: 50%;
+    overflow: hidden;
+    border: 4px solid #fff;
+    box-shadow: 0 0 0 3px var(--rose), 0 10px 34px rgba(194,99,122,.38);
+    opacity: 0;
+    transition: opacity .9s ease, transform .9s cubic-bezier(.2,.78,.24,1);
+    z-index: 10;
+    background: var(--blush);
+  }
+  #photoWrap.show { opacity: 1; transform: translate(-50%, -50%) scale(1); }
+
+  /* ━━━ TROQUE O src ABAIXO PELA FOTO DELA ━━━ */
+  #photoWrap img {
+    width: 100%; height: 100%; object-fit: cover; display: block;
+    object-position: 50% 48%;
+    transform: scale(1.34);
+  }
+
+  #heartText {
+    max-width: min(520px, 88vw);
+    color: var(--wine);
+    font-family: 'Playfair Display', serif;
+    font-size: clamp(1.1rem, 4.5vw, 1.55rem);
+    font-style: italic;
+    line-height: 1.45;
+    text-align: center;
+    opacity: 0;
+    transform: translateY(14px);
+    transition: opacity .75s ease, transform .75s ease;
+  }
+  #heartText.show {
+    opacity: 1;
+    transform: translateY(0);
+  }
+
+  #scrollHint {
+    color: var(--muted);
+    font-family: 'Crimson Pro', Georgia, serif;
+    font-size: clamp(.95rem, 3.6vw, 1.1rem);
+    letter-spacing: .04em;
+    line-height: 1.3;
+    text-align: center;
+    opacity: 0;
+    transform: translateY(10px);
+    transition: opacity .65s ease, transform .65s ease;
+  }
+  #scrollHint.show {
+    opacity: .9;
+    transform: translateY(0);
+  }
+  #scrollHint::after {
+    content: '↓';
+    display: block;
+    margin-top: 6px;
+    color: var(--rose-dark);
+    font-size: 1.25rem;
+    animation: hintBounce 1.3s ease-in-out infinite;
+  }
+  @keyframes hintBounce {
+    0%, 100% { transform: translateY(0); opacity: .55; }
+    50% { transform: translateY(5px); opacity: 1; }
+  }
+
+  /* floating bg hearts */
+  .bg-heart {
+    position: absolute;
+    opacity: 0;
+    animation: floatUp 7s linear infinite;
+    pointer-events: none;
+  }
+  @keyframes floatUp {
+    0%   { transform: translateY(0) scale(.8); opacity: 0; }
+    15%  { opacity: .45; }
+    80%  { opacity: .25; }
+    100% { transform: translateY(-110vh) scale(1.2); opacity: 0; }
+  }
+
+  /* ══ SECTION 2 ══ */
+  #memories {
+    padding: 100px 5vw;
+    max-width: 1100px;
+    margin: 0 auto;
+  }
+  #memories h2 {
+    font-family: 'Playfair Display', serif;
+    font-style: italic;
+    font-size: clamp(2rem, 4vw, 3rem);
+    color: var(--wine);
+    text-align: center;
+    margin-bottom: 80px;
+  }
+  #memories h2::after {
+    content: '';
+    display: block; width: 60px; height: 3px;
+    background: linear-gradient(90deg, var(--rose), var(--rose-dark));
+    margin: 14px auto 0; border-radius: 2px;
+  }
+  .memory-block {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 60px; align-items: center; margin-bottom: 90px;
+    opacity: 0; transform: translateY(40px);
+    transition: opacity .7s, transform .7s;
+  }
+  .memory-block.in-view { opacity: 1; transform: translateY(0); }
+  .memory-block.reverse { direction: rtl; }
+  .memory-block.reverse > * { direction: ltr; }
+  @media (max-width: 680px) {
+    .memory-block, .memory-block.reverse { grid-template-columns: 1fr; direction: ltr; gap: 30px; }
+  }
+
+  /* memory image frame */
+  .memory-img {
+    border-radius: 22px;
+    overflow: hidden;
+    aspect-ratio: 4/3;
+    box-shadow: 0 20px 60px rgba(194,99,122,.22);
+    position: relative;
+  }
+  .memory-img::before {
+    content: '';
+    position: absolute; inset: 0;
+    background: linear-gradient(145deg, rgba(255,255,255,.14) 0%, transparent 55%);
+    z-index: 1; pointer-events: none;
+  }
+
+  /* ━━━ TROQUE OS src ABAIXO PELAS FOTOS DE MEMÓRIA ━━━ */
+  .memory-img img {
+    width: 100%; height: 100%; object-fit: cover; display: block;
+  }
+
+  .memory-text { display: flex; flex-direction: column; gap: 16px; }
+  .memory-text h3 {
+    font-family: 'Playfair Display', serif; font-style: italic;
+    font-size: clamp(1.4rem, 2.5vw, 2rem); color: var(--wine); line-height: 1.2;
+  }
+  .memory-text p {
+    font-size: 1.1rem; line-height: 1.8; color: var(--text);
+    border-left: 3px solid var(--rose); padding-left: 18px;
+  }
+  .memory-text .date-tag {
+    display: inline-block; background: var(--blush); color: var(--rose-dark);
+    font-size: .8rem; letter-spacing: .12em; text-transform: uppercase;
+    padding: 4px 14px; border-radius: 20px; align-self: flex-start;
+  }
+
+  /* ══ FOOTER ══ */
+  footer {
+    background: linear-gradient(135deg, var(--wine) 0%, #4a1528 100%);
+    color: #fce4ec; padding: 60px 20px 40px;
+    text-align: center; position: relative; overflow: hidden;
+  }
+  footer::before {
+    content: '♡ ♡ ♡ ♡ ♡ ♡ ♡ ♡ ♡ ♡ ♡ ♡ ♡ ♡ ♡ ♡ ♡ ♡ ♡ ♡';
+    position: absolute; top: 16px; left: 0; right: 0;
+    font-size: .8rem; letter-spacing: .3em;
+    color: rgba(255,255,255,.1); white-space: nowrap; overflow: hidden;
+  }
+  footer .footer-heart {
+    font-size: 3rem; display: block; margin-bottom: 18px;
+    animation: heartbeat 1.4s ease-in-out infinite;
+  }
+  @keyframes heartbeat {
+    0%,100%{ transform: scale(1);   }
+    14%    { transform: scale(1.22);}
+    28%    { transform: scale(1);   }
+    42%    { transform: scale(1.15);}
+    56%    { transform: scale(1);   }
+  }
+  footer h3 {
+    font-family: 'Playfair Display', serif; font-style: italic;
+    font-size: 1.6rem; color: #fff; margin-bottom: 10px;
+  }
+  footer p {
+    font-size: 1rem; color: rgba(255,200,210,.8);
+    max-width: 400px; margin: 0 auto 24px; line-height: 1.7;
+  }
+  footer .dots { display: flex; justify-content: center; gap: 8px; margin-top: 30px; }
+  footer .dots span {
+    width: 8px; height: 8px; background: rgba(255,200,210,.4);
+    border-radius: 50%; display: inline-block;
+    animation: pulseDot 1.6s ease-in-out infinite;
+  }
+  footer .dots span:nth-child(2){ animation-delay: .2s; }
+  footer .dots span:nth-child(3){ animation-delay: .4s; }
+  @keyframes pulseDot { 0%,100%{transform:scale(1);opacity:.4} 50%{transform:scale(1.5);opacity:1} }
+  footer small {
+    display: block; margin-top: 34px; font-size: .78rem;
+    color: rgba(255,200,210,.35); letter-spacing: .1em;
+  }
+
+  @media (max-width: 520px) {
+    #hero {
+      min-height: 100svh;
+      padding: 48px 14px 48px;
+      justify-content: flex-start;
+    }
+    #hero.opened {
+      justify-content: center;
+      padding-block: 28px;
+    }
+    #hero.opened #heartStage {
+      transform: translateY(64px);
+    }
+    #hero h1 {
+      font-size: clamp(1.75rem, 9vw, 2.35rem);
+      text-align: center;
+      line-height: 1.15;
+      margin-top: 6px;
+    }
+    #hero p.subtitle {
+      max-width: 280px;
+      text-align: center;
+      line-height: 1.35;
+      margin-bottom: 26px;
+    }
+    #startBtn {
+      width: min(100%, 310px);
+      white-space: normal;
+      line-height: 1.25;
+    }
+    #startBtn span {
+      min-width: min(270px, calc(100vw - 58px));
+      padding-inline: 18px;
+    }
+    #heartStage {
+      margin-top: 0;
+      gap: 12px;
+    }
+    #heartCanvas {
+      width: min(360px, 96vw, calc(58svh * 440 / 410));
+    }
+    #photoWrap {
+      width: clamp(82px, 26%, 98px);
+      border-width: 3px;
+      box-shadow: 0 0 0 2px var(--rose), 0 10px 28px rgba(194,99,122,.34);
+    }
+    #memories {
+      padding: 70px 18px;
+    }
+    #memories h2 {
+      margin-bottom: 46px;
+    }
+    .memory-block {
+      margin-bottom: 58px;
+    }
+    .memory-img {
+      border-radius: 14px;
+    }
+    .memory-text p {
+      font-size: 1rem;
+      line-height: 1.65;
+      padding-left: 14px;
+    }
+  }
+</style>
+</head>
+<body>
+<audio id="loveSong" src="linda-flor.mp3" preload="auto"></audio>
+
+<!-- ══════════ SECTION 1 ══════════ -->
+<section id="hero">
+  <h1>Para a minha linda flor ✦</h1>
+  <p class="subtitle">Clique e descubra meus sentimentos por você.</p>
+  <button id="startBtn"><span>Abrir meu coração 💕</span></button>
+
+  <div id="heartStage">
+    <div id="heartCanvas">
+      <div id="photoWrap">
+        <img src="nos.jpeg" alt="Foto da Hillary">
+      </div>
+
+    </div>
+    <p id="heartText">Hillary, você é a pessoa mais especial e importante para mim neste planeta. Cada momento ao seu lado é único. EU TE AMO!!</p>
+    <p id="scrollHint">Role para baixo para ver nossas memórias</p>
+  </div>
+</section>
+
+<!-- ══════════ SECTION 2 ══════════ -->
+<section id="memories">
+  <h2>Nossas memórias</h2>
+
+  <!-- Bloco 1: imagem esquerda · texto direita -->
+  <div class="memory-block">
+    <div class="memory-img">
+      <img src="nos.jpeg" alt="Nossa memória 1">
+    </div>
+    <div class="memory-text">
+      <span class="date-tag">Memória 01</span>
+      <h3>Quando tudo começou…</h3>
+      <p>Quando tudo começou, foi algo incrível. Deixei uma foto do nosso primeiro encontro; aquela noite foi inesquecível. A gente teve um começo um pouco difícil, mas, apesar dos pesares, tudo valeu a pena. Nosso primeiro abraço, nosso primeiro beijo... Foi ali que eu senti que você era a pessoa que eu queria para a vida.</p>
+    </div>
+  </div>
+
+  <!-- Bloco 2: texto esquerda · imagem direita -->
+  <div class="memory-block reverse">
+    <div class="memory-img">
+      <img src="nos1.jpeg" alt="Nossa memória 2">
+    </div>
+    <div class="memory-text">
+      <span class="date-tag">Memória 02</span>
+      <h3>E que continue para sempre</h3>
+      <p>Cada momento ao seu lado é um presente. Espero que isso se estenda por muitos anos; quem sabe não seja o começo da nossa família? Quero que você entenda minha dedicação e meu esforço. Você vale cada gota do meu suor. Você sabe que é especial: minha metade, meu lar!</p>
+    </div>
+  </div>
+</section>
+
+<!-- ══════════ FOOTER ══════════ -->
+<footer>
+  <span class="footer-heart">🫀</span>
+  <h3>Te amo para todo o sempre</h3>
+  <p>Feito com muito amor e dedicação para a pessoa que ilumina cada dia da minha vida.</p>
+  <div class="dots"><span></span><span></span><span></span></div>
+  <small>Criado pelo seu amor ♡ Somente para você</small>
+</footer>
+
+<script>
+/* ════════════════════════════════════════
+   2-D HEART ANIMATION
+   Letters appear one-by-one tracing the
+   heart curve, then gently pulse/float.
+════════════════════════════════════════ */
+
+const MESSAGE   = 'Te amo! ';
+const N_POINTS  = 210;          // total characters
+const STAGGER   = 13;           // ms between each letter appearing
+const FLOAT_DELAY = 400;        // ms after last letter before float starts
+
+const canvas  = document.getElementById('heartCanvas');
+const loveSong = document.getElementById('loveSong');
+let   charEls = [];
+
+function getHeartMetrics() {
+  const width = canvas.offsetWidth || 440;
+  const height = canvas.offsetHeight || 410;
+  return {
+    width,
+    height,
+    cx: width / 2,
+    cy: height / 2,
+    scale: Math.min(width / 440, height / 410) * 12.8
+  };
+}
+
+function rawHeartPoint(t, scale) {
+  const s = Math.sin(t);
+  return {
+    x: 16 * s * s * s * scale,
+    y: -(13*Math.cos(t) - 5*Math.cos(2*t) - 2*Math.cos(3*t) - Math.cos(4*t)) * scale
+  };
+}
+
+function buildHeartPoints(count, metrics) {
+  const rawPoints = [];
+  for (let i = 0; i < count; i++) {
+    rawPoints.push(rawHeartPoint((i / count) * 2 * Math.PI, metrics.scale));
+  }
+
+  const bounds = rawPoints.reduce((acc, p) => ({
+    minX: Math.min(acc.minX, p.x),
+    maxX: Math.max(acc.maxX, p.x),
+    minY: Math.min(acc.minY, p.y),
+    maxY: Math.max(acc.maxY, p.y)
+  }), { minX: Infinity, maxX: -Infinity, minY: Infinity, maxY: -Infinity });
+
+  const offsetX = metrics.cx - (bounds.minX + bounds.maxX) / 2;
+  const offsetY = metrics.cy - (bounds.minY + bounds.maxY) / 2;
+  return rawPoints.map(p => ({ x: p.x + offsetX, y: p.y + offsetY }));
+}
+
+function buildHeart() {
+  charEls.forEach(e => e.remove());
+  charEls = [];
+
+  const metrics = getHeartMetrics();
+  const points = buildHeartPoints(N_POINTS, metrics);
+
+  for (let i = 0; i < N_POINTS; i++) {
+    const p = points[i];
+
+    const el = document.createElement('span');
+    el.className  = 'char-dot';
+    el.textContent = MESSAGE[i % MESSAGE.length];
+    el.style.left  = p.x + 'px';
+    el.style.top   = p.y + 'px';
+    el.style.setProperty('--start-x', (metrics.cx - p.x) + 'px');
+    el.style.setProperty('--start-y', (metrics.cy - p.y) + 'px');
+    el.style.setProperty('--spin', ((i % 2 ? -1 : 1) * (35 + Math.random() * 80)).toFixed(1) + 'deg');
+    el.style.animationDelay = (Math.random() * 2).toFixed(2) + 's';
+
+    canvas.appendChild(el);
+    charEls.push(el);
+
+    setTimeout(() => el.classList.add('show'), STAGGER * i);
+  }
+
+  const totalReveal = STAGGER * N_POINTS + FLOAT_DELAY;
+  setTimeout(() => charEls.forEach(e => e.classList.add('float')), totalReveal);
+
+  setTimeout(() => {
+    document.getElementById('photoWrap').classList.add('show');
+  }, STAGGER * Math.floor(N_POINTS / 2));
+
+  setTimeout(() => {
+    document.getElementById('heartText').classList.add('show');
+    document.getElementById('scrollHint').classList.add('show');
+  }, STAGGER * N_POINTS + 180);
+}
+
+/* ── button ── */
+document.getElementById('startBtn').addEventListener('click', () => {
+  loveSong.volume = 0.72;
+  loveSong.currentTime = 0;
+  loveSong.play().catch(() => {
+    console.info('Coloque o arquivo linda-flor.mp3 na mesma pasta do HTML para a música tocar.');
+  });
+  document.getElementById('hero').classList.add('opened');
+  document.getElementById('startBtn').classList.add('hidden');
+  document.getElementById('heartStage').classList.add('visible');
+  buildHeart();
+  spawnBgHearts();
+});
+
+/* ── floating background hearts ── */
+function spawnBgHearts() {
+  const em = ['♡','♥','💕','💗','💖','🌸'];
+  let n = 0;
+  const iv = setInterval(() => {
+    if (n++ > 26) { clearInterval(iv); return; }
+    const el = document.createElement('div');
+    el.className = 'bg-heart';
+    el.textContent = em[n % em.length];
+    Object.assign(el.style, {
+      left:              Math.random() * 100 + 'vw',
+      top:               '100vh',
+      fontSize:          (.8 + Math.random() * 1.4) + 'rem',
+      animationDuration: (4  + Math.random() * 5)   + 's',
+      animationDelay:    (Math.random() * 3)         + 's'
+    });
+    document.getElementById('hero').appendChild(el);
+    setTimeout(() => el.remove(), 12000);
+  }, 380);
+}
+
+/* ── scroll reveal for memory blocks ── */
+const obs = new IntersectionObserver(
+  es => es.forEach(e => { if (e.isIntersecting) e.target.classList.add('in-view'); }),
+  { threshold: 0.15 }
+);
+document.querySelectorAll('.memory-block').forEach(b => obs.observe(b));
+</script>
+</body>
+</html>
